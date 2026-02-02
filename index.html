@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reservas de Passeios</title>
+<title>Reservas – Trilhas de Março</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -68,21 +68,21 @@ select,input{
 const PIX="trilheiros.roomt@gmail.com";
 const WHATS="5566996926174";
 
-/* LINKS DE CARTÃO (1 VAGA) */
-const CARTAO_CHAPADA = {
-  compartilhado_transporte: "https://mpago.li/1VoTeFx",
-  casal_transporte: "https://mpago.li/1szssQp",
-  casal_carro: "https://mpago.li/2iuq5uT"
+/* LINKS DE CARTÃO – APENAS 1 VAGA */
+const CARTAO_CHAPADA={
+  compartilhado_transporte:"https://mpago.li/1VoTeFx",
+  casal_transporte:"https://mpago.li/1szssQp",
+  casal_carro:"https://mpago.li/2iuq5uT"
 };
 
 /* VAGAS */
-const VAGAS = {
-  chapada: { total:30, key:"vagas_chapada" },
-  lagoa: { total:28, key:"vagas_lagoa" }
+const VAGAS={
+  chapada:{total:30,key:"vagas_chapada"},
+  lagoa:{total:28,key:"vagas_lagoa"}
 };
 
 /* VALORES */
-const VALORES = {
+const VALORES={
   chapada:{
     compartilhado_transporte:{pix:420,cartao:440},
     casal_transporte:{pix:740,cartao:760},
@@ -104,14 +104,14 @@ function iniciar(){
 }
 
 function carregarPasseio(){
-  passeioAtual = passeio.value;
+  passeioAtual=passeio.value;
 
   if(passeioAtual==="chapada"){
     banner.src="https://i.postimg.cc/vZLwxjSc/Copia-de-Post-instagram-dia-dos-povos-indigenas-ousado-verde.png";
     descricao.innerHTML=`
 🗓️ <b>7 e 8 de março</b><br>
 🕑 Saída: 07/03 às 14h<br>
-🕒 Retorno: 08/03 por volta das 15h<br><br>
+🕒 Retorno: 08/03 às 15h<br><br>
 🏡 <b>Hospedagem:</b> Pousada Mirante<br><br>
 📍 <b>Roteiro:</b><br>
 • Mirante Geodésico<br>
@@ -130,38 +130,35 @@ function carregarPasseio(){
     descricao.innerHTML=`
 🗓️ <b>15 de março</b><br>
 🚐 Saída de Rondonópolis<br><br>
-💙 Um dia perfeito em águas cristalinas para relaxar e aproveitar a natureza.<br><br>
-✅ Incluso: transporte ida e volta, snorkel, colete salva-vidas, seguro de vida e guia<br>
+💙 Um dia inteiro em águas cristalinas.<br><br>
+✅ Incluso: transporte, snorkel, colete, seguro de vida e guia<br>
 ❌ Não incluso: café da manhã e almoço
 `;
     boxChapada.style.display="none";
     boxLagoa.style.display="block";
   }
 
-  vagasDisponiveis = localStorage.getItem(VAGAS[passeioAtual].key);
+  vagasDisponiveis=localStorage.getItem(VAGAS[passeioAtual].key);
   if(vagasDisponiveis===null){
-    vagasDisponiveis = VAGAS[passeioAtual].total;
-    localStorage.setItem(VAGAS[passeioAtual].key, vagasDisponiveis);
+    vagasDisponiveis=VAGAS[passeioAtual].total;
+    localStorage.setItem(VAGAS[passeioAtual].key,vagasDisponiveis);
   }
-  vagasDisponiveis = parseInt(vagasDisponiveis);
+  vagasDisponiveis=parseInt(vagasDisponiveis);
 
   atualizar();
 }
 
 function atualizar(){
-  let qtd=0;
-  let totalValor=0;
+  let qtd=0,totalValor=0;
   const forma=pagamento.value;
 
-  infoVagas.innerHTML=`🎟️ Vagas restantes: <b>${vagasDisponiveis}</b>`;
+  infoVagas.innerHTML=`🎟️ Vagas disponíveis: <b>${vagasDisponiveis}</b>`;
   ultimas.style.display=(vagasDisponiveis<=5 && vagasDisponiveis>0)?"block":"none";
   esgotado.style.display=vagasDisponiveis<=0?"block":"none";
 
   if(passeioAtual==="chapada"){
     qtd=parseInt(qtdVagas.value);
-    if(qtd>0){
-      totalValor=qtd*VALORES.chapada[opcaoChapada.value][forma];
-    }
+    if(qtd>0) totalValor=qtd*VALORES.chapada[opcaoChapada.value][forma];
   }
 
   if(passeioAtual==="lagoa"){
@@ -172,15 +169,8 @@ function atualizar(){
       (parseInt(qtdCarro.value)*VALORES.lagoa.carro[forma]);
   }
 
-  if(qtd===0 || vagasDisponiveis<=0){
-    total.innerText="";
-    return;
-  }
-
-  if(qtd>vagasDisponiveis){
-    total.innerText="⚠️ Quantidade maior que vagas disponíveis";
-    return;
-  }
+  if(qtd===0||vagasDisponiveis<=0){total.innerText="";return;}
+  if(qtd>vagasDisponiveis){total.innerText="⚠️ Quantidade maior que vagas disponíveis";return;}
 
   total.innerText=`🎟️ ${qtd} vaga(s) | 💰 R$ ${totalValor}`;
 }
@@ -191,7 +181,6 @@ function confirmar(){
   let qtd=0;
   if(passeioAtual==="chapada") qtd=parseInt(qtdVagas.value);
   if(passeioAtual==="lagoa") qtd=parseInt(qtdAdulto.value)+parseInt(qtdCrianca.value)+parseInt(qtdCarro.value);
-
   if(qtd>vagasDisponiveis) return;
 
   if(pagamento.value==="pix"){
@@ -204,7 +193,7 @@ function confirmar(){
     }
     if(passeioAtual==="chapada" && CARTAO_CHAPADA[opcaoChapada.value]){
       window.open(CARTAO_CHAPADA[opcaoChapada.value],"_blank");
-      alert("Após o pagamento, envie o comprovante para garantir sua vaga.");
+      alert("Após o pagamento, envie o comprovante.");
     }else{
       alert("Pagamento no cartão disponível apenas via contato com o Jonatas.");
       return;
@@ -214,8 +203,7 @@ function confirmar(){
   vagasDisponiveis-=qtd;
   localStorage.setItem(VAGAS[passeioAtual].key,vagasDisponiveis);
 
-  const msg=
-`Reserva – ${passeio.options[passeio.selectedIndex].text}
+  const msg=`Reserva – ${passeio.options[passeio.selectedIndex].text}
 Nome: ${nomeCliente.value}
 ${total.innerText}
 
@@ -246,9 +234,8 @@ Envio o comprovante para garantir minha vaga.`;
 <label>Nome completo</label>
 <input id="nomeCliente">
 
-<!-- CHAPADA -->
 <div id="boxChapada">
-<label>Opção de hospedagem</label>
+<label>Opção</label>
 <select id="opcaoChapada" onchange="atualizar()">
   <option value="compartilhado_transporte">🛏️ Quarto compartilhado – transporte incluso</option>
   <option value="casal_transporte">🛌 Quarto casal – transporte incluso</option>
@@ -264,14 +251,13 @@ Envio o comprovante para garantir minha vaga.`;
 </select>
 </div>
 
-<!-- LAGOA AZUL -->
 <div id="boxLagoa" style="display:none">
 <label>Adultos</label>
 <select id="qtdAdulto" onchange="atualizar()">
   <option>0</option><option>1</option><option>2</option><option>3</option>
 </select>
 
-<label>Crianças até 10 anos</label>
+<label>Crianças</label>
 <select id="qtdCrianca" onchange="atualizar()">
   <option>0</option><option>1</option><option>2</option>
 </select>
@@ -291,7 +277,7 @@ Envio o comprovante para garantir minha vaga.`;
 <label>Forma de pagamento</label>
 <select id="pagamento" onchange="atualizar()">
   <option value="pix">PIX</option>
-  <option value="cartao">Cartão de crédito</option>
+  <option value="cartao">Cartão</option>
 </select>
 
 <button class="btn" onclick="confirmar()">CONFIRMAR E ENVIAR COMPROVANTE</button>
