@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reservas de Passeios</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+body{margin:0;background:#0f0f0f;font-family:Poppins,sans-serif;color:#fff}
+.container{max-width:520px;margin:auto;padding:14px}
+.card{background:#181818;border-radius:22px;padding:16px;box-shadow:0 0 25px rgba(0,0,0,.7)}
+.banner img{width:100%;border-radius:18px}
+
+h2{text-align:center;margin:10px 0}
+p{font-size:14px;line-height:1.6;color:#ddd}
+
+label{margin-top:12px;display:block;font-weight:600}
+select,input{
+  width:100%;
+  padding:14px;
+  border-radius:14px;
+  border:none;
+  background:#2a2a2a;
+  color:#fff;
+}
+
+.info{text-align:center;margin-top:6px;font-size:14px}
+.total{font-size:22px;font-weight:700;text-align:center;color:#00ff9c;margin-top:10px}
+
+.ultimas{
+  display:none;
+  background:#ff1744;
+  padding:10px;
+  border-radius:12px;
+  text-align:center;
+  font-weight:700;
+  margin-top:8px;
+  animation:pulse .8s infinite;
+}
+@keyframes pulse{0%{opacity:1}50%{opacity:.5}100%{opacity:1}}
+
+.esgotado{
+  display:none;
+  background:#550000;
+  padding:12px;
+  border-radius:12px;
+  text-align:center;
+  font-weight:700;
+  margin-top:10px;
+}
+
+.btn{
+  width:100%;
+  margin-top:16px;
+  padding:18px;
+  border-radius:50px;
+  border:none;
+  font-size:18px;
+  font-weight:700;
+  background:linear-gradient(135deg,#00ff9c,#00c96b);
+  cursor:pointer;
+}
+</style>
+
+<script>
+const PIX="trilheiros.roomt@gmail.com";
+const WHATS="5566996926174";
+
+/* LINKS DE CARTÃO (1 VAGA) */
+const CARTAO_CHAPADA = {
+  compartilhado_transporte: "https://mpago.li/1VoTeFx",
+  casal_transporte: "https://mpago.li/1szssQp",
+  casal_carro: "https://mpago.li/2iuq5uT"
+};
+
+/* VAGAS */
+const VAGAS = {
+  chapada: { total:30, key:"vagas_chapada" },
+  lagoa: { total:28, key:"vagas_lagoa" }
+};
+
+/* VALORES */
+const VALORES = {
+  chapada:{
+    compartilhado_transporte:{pix:420,cartao:440},
+    casal_transporte:{pix:740,cartao:760},
+    compartilhado_carro:{pix:330,cartao:350},
+    casal_carro:{pix:510,cartao:530}
+  },
+  lagoa:{
+    adulto:{pix:336,cartao:340},
+    crianca:{pix:280,cartao:280},
+    carro:{pix:215,cartao:215}
+  }
+};
+
+let passeioAtual="chapada";
+let vagasDisponiveis=0;
+
+function iniciar(){
+  carregarPasseio();
+}
+
+function carregarPasseio(){
+  passeioAtual = passeio.value;
+
+  if(passeioAtual==="chapada"){
+    banner.src="https://i.postimg.cc/vZLwxjSc/Copia-de-Post-instagram-dia-dos-povos-indigenas-ousado-verde.png";
+    descricao.innerHTML=`
+🗓️ <b>7 e 8 de março</b><br>
+🕑 Saída: 07/03 às 14h<br>
+🕒 Retorno: 08/03 por volta das 15h<br><br>
+🏡 <b>Hospedagem:</b> Pousada Mirante<br><br>
+📍 <b>Roteiro:</b><br>
+• Mirante Geodésico<br>
+• Mirante Morro dos Ventos<br>
+• Praça Central da Chapada<br>
+• Cachoeira Véu da Noiva<br><br>
+✅ Incluso: transporte (exceto carro próprio), café da manhã e acesso aos atrativos<br>
+❌ Não incluso: almoço e jantar
+`;
+    boxChapada.style.display="block";
+    boxLagoa.style.display="none";
+  }
+
+  if(passeioAtual==="lagoa"){
+    banner.src="https://i.postimg.cc/7hYnXCqs/Instagram-Post-Agencia-de-Viagem-Moderno-Azul-e-Branco.png";
+    descricao.innerHTML=`
+🗓️ <b>15 de março</b><br>
+🚐 Saída de Rondonópolis<br><br>
+💙 Um dia perfeito em águas cristalinas para relaxar e aproveitar a natureza.<br><br>
+✅ Incluso: transporte ida e volta, snorkel, colete salva-vidas, seguro de vida e guia<br>
+❌ Não incluso: café da manhã e almoço
+`;
+    boxChapada.style.display="none";
+    boxLagoa.style.display="block";
+  }
+
+  vagasDisponiveis = localStorage.getItem(VAGAS[passeioAtual].key);
+  if(vagasDisponiveis===null){
+    vagasDisponiveis = VAGAS[passeioAtual].total;
+    localStorage.setItem(VAGAS[passeioAtual].key, vagasDisponiveis);
+  }
+  vagasDisponiveis = parseInt(vagasDisponiveis);
+
+  atualizar();
+}
+
+function atualizar(){
+  let qtd=0;
+  let totalValor=0;
+  const forma=pagamento.value;
+
+  infoVagas.innerHTML=`🎟️ Vagas restantes: <b>${vagasDisponiveis}</b>`;
+  ultimas.style.display=(vagasDisponiveis<=5 && vagasDisponiveis>0)?"block":"none";
+  esgotado.style.display=vagasDisponiveis<=0?"block":"none";
+
+  if(passeioAtual==="chapada"){
+    qtd=parseInt(qtdVagas.value);
+    if(qtd>0){
+      totalValor=qtd*VALORES.chapada[opcaoChapada.value][forma];
+    }
+  }
+
+  if(passeioAtual==="lagoa"){
+    qtd=parseInt(qtdAdulto.value)+parseInt(qtdCrianca.value)+parseInt(qtdCarro.value);
+    totalValor=
+      (parseInt(qtdAdulto.value)*VALORES.lagoa.adulto[forma])+
+      (parseInt(qtdCrianca.value)*VALORES.lagoa.crianca[forma])+
+      (parseInt(qtdCarro.value)*VALORES.lagoa.carro[forma]);
+  }
+
+  if(qtd===0 || vagasDisponiveis<=0){
+    total.innerText="";
+    return;
+  }
+
+  if(qtd>vagasDisponiveis){
+    total.innerText="⚠️ Quantidade maior que vagas disponíveis";
+    return;
+  }
+
+  total.innerText=`🎟️ ${qtd} vaga(s) | 💰 R$ ${totalValor}`;
+}
+
+function confirmar(){
+  if(!nomeCliente.value.trim()) return alert("Informe seu nome.");
+
+  let qtd=0;
+  if(passeioAtual==="chapada") qtd=parseInt(qtdVagas.value);
+  if(passeioAtual==="lagoa") qtd=parseInt(qtdAdulto.value)+parseInt(qtdCrianca.value)+parseInt(qtdCarro.value);
+
+  if(qtd>vagasDisponiveis) return;
+
+  if(pagamento.value==="pix"){
+    navigator.clipboard.writeText(PIX);
+    alert("PIX copiado! Envie o comprovante para garantir sua vaga.");
+  }else{
+    if(qtd>1){
+      alert("Para mais de uma vaga no cartão, fale com o Jonatas para gerar um novo link.");
+      return;
+    }
+    if(passeioAtual==="chapada" && CARTAO_CHAPADA[opcaoChapada.value]){
+      window.open(CARTAO_CHAPADA[opcaoChapada.value],"_blank");
+      alert("Após o pagamento, envie o comprovante para garantir sua vaga.");
+    }else{
+      alert("Pagamento no cartão disponível apenas via contato com o Jonatas.");
+      return;
+    }
+  }
+
+  vagasDisponiveis-=qtd;
+  localStorage.setItem(VAGAS[passeioAtual].key,vagasDisponiveis);
+
+  const msg=
+`Reserva – ${passeio.options[passeio.selectedIndex].text}
+Nome: ${nomeCliente.value}
+${total.innerText}
+
+Envio o comprovante para garantir minha vaga.`;
+
+  window.open(`https://wa.me/${WHATS}?text=${encodeURIComponent(msg)}`);
+  atualizar();
+}
+</script>
+</head>
+
+<body onload="iniciar()">
+<div class="container">
+<div class="card">
+
+<div class="banner"><img id="banner"></div>
+
+<h2>Reservas</h2>
+
+<label>Escolha o passeio</label>
+<select id="passeio" onchange="carregarPasseio()">
+  <option value="chapada">🌄 Chapada dos Guimarães</option>
+  <option value="lagoa">💙 Lagoa Azul</option>
+</select>
+
+<p id="descricao"></p>
+
+<label>Nome completo</label>
+<input id="nomeCliente">
+
+<!-- CHAPADA -->
+<div id="boxChapada">
+<label>Opção de hospedagem</label>
+<select id="opcaoChapada" onchange="atualizar()">
+  <option value="compartilhado_transporte">🛏️ Quarto compartilhado – transporte incluso</option>
+  <option value="casal_transporte">🛌 Quarto casal – transporte incluso</option>
+  <option value="compartilhado_carro">🚗 Carro próprio – quarto compartilhado</option>
+  <option value="casal_carro">🚗 Carro próprio – quarto casal</option>
+</select>
+
+<label>Quantidade de vagas</label>
+<select id="qtdVagas" onchange="atualizar()">
+  <option>0</option><option>1</option><option>2</option><option>3</option>
+  <option>4</option><option>5</option><option>6</option><option>7</option>
+  <option>8</option><option>9</option><option>10</option>
+</select>
+</div>
+
+<!-- LAGOA AZUL -->
+<div id="boxLagoa" style="display:none">
+<label>Adultos</label>
+<select id="qtdAdulto" onchange="atualizar()">
+  <option>0</option><option>1</option><option>2</option><option>3</option>
+</select>
+
+<label>Crianças até 10 anos</label>
+<select id="qtdCrianca" onchange="atualizar()">
+  <option>0</option><option>1</option><option>2</option>
+</select>
+
+<label>Veículo próprio</label>
+<select id="qtdCarro" onchange="atualizar()">
+  <option>0</option><option>1</option><option>2</option>
+</select>
+</div>
+
+<div id="infoVagas" class="info"></div>
+<div id="ultimas" class="ultimas">⚠️ ÚLTIMAS VAGAS</div>
+<div id="esgotado" class="esgotado">❌ VAGAS ESGOTADAS</div>
+
+<div id="total" class="total"></div>
+
+<label>Forma de pagamento</label>
+<select id="pagamento" onchange="atualizar()">
+  <option value="pix">PIX</option>
+  <option value="cartao">Cartão de crédito</option>
+</select>
+
+<button class="btn" onclick="confirmar()">CONFIRMAR E ENVIAR COMPROVANTE</button>
+
+</div>
+</div>
+</body>
+</html>
